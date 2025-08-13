@@ -66,3 +66,42 @@ export const AddOrder = async (req, res) => {
     return res.status(500).json({ success: false });
   }
 };
+
+
+
+export const updateOrderStatus = async (req, res) => {
+  const { orderId } = req.params;
+  const { status } = req.body; 
+  try {
+  
+    const order = await Order.findOneAndUpdate(
+      { _id: orderId, status: null },
+      { status },
+      { new: true }
+    ).populate("productID");
+
+    if (!order) {
+      return res.status(400).json({ success: false, message: "Order not found or already processed" });
+    }
+
+  
+    if (status === true) {
+      const product = order.productID;
+      if (!product) {
+        return res.status(404).json({ success: false, message: "Product not found" });
+      }
+
+      if (product.quantity < order.quantity) {
+        return res.status(400).json({ success: false, message: "Insufficient stock to approve order" });
+      }
+
+      product.quantity -= order.quantity;
+      await product.save();
+    }
+
+    res.status(200).json({ success: true, message: `Order ${status ? "approved" : "rejected"} successfully` });
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};

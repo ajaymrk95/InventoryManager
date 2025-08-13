@@ -29,20 +29,64 @@ const Orders = () => {
   useEffect(() => {
     fetchOrders();
   }, []);
-  
+
   const getStatusLabel = (status) => {
     if (status === null) return "Pending";
     return status ? "Approved" : "Rejected";
   };
 
-  const handleApprove = (orderId,productID,quantity) => {
-    console.log(`Approving order: ${orderId}`);
-    // TODO: Call backend API to approve
+  const handleApprove = async (orderId) => {
+    try {
+      const auth = JSON.parse(localStorage.getItem("auth"));
+      const token = auth?.token;
+
+      const response = await axios.post(
+        `http://localhost:5000/api/orders/updatestatus/${orderId}`,
+        { status: true },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.success) {
+        alert("Order approved successfully");
+        fetchOrders(); // Refresh orders
+      } else {
+        alert(response.data.message || "Failed to approve order");
+      }
+    } catch (error) {
+      console.error("Approval error:", error);
+      alert("Something went wrong while approving");
+    }
   };
 
-  const handleCancel = (orderId) => {
-    console.log(`Cancelling order: ${orderId}`);
-    // TODO: Call backend API to reject/cancel
+  const handleCancel = async (orderId) => {
+    try {
+      const auth = JSON.parse(localStorage.getItem("auth"));
+      const token = auth?.token;
+
+      const response = await axios.post(
+        `http://localhost:5000/api/orders/updatestatus/${orderId}`,
+        { status: false },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.success) {
+        alert("Order rejected successfully");
+        fetchOrders(); // Refresh orders
+      } else {
+        alert(response.data.message || "Failed to reject order");
+      }
+    } catch (error) {
+      console.error("Rejection error:", error);
+      alert("Something went wrong while rejecting");
+    }
   };
 
   return (
@@ -90,18 +134,25 @@ const Orders = () => {
                     {new Date(order.createdAt).toLocaleDateString()}
                   </td>
                   <td className="py-3 px-4 space-x-2">
-                    <button
-                      onClick={() => handleApprove(order._id,order.productID,order.quantity)}
-                      className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
-                    >
-                      Approve
-                    </button>
-                    <button
-                      onClick={() => handleCancel(order._id)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-                    >
-                      Cancel
-                    </button>
+                    {order.status === null && (
+                      <>
+                        <button
+                          onClick={() => handleApprove(order._id)}
+                          className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => handleCancel(order._id)}
+                          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    )}
+                    {order.status !== null && (
+                      <span className="text-sm text-gray-500">Processed</span>
+                    )}
                   </td>
                 </tr>
               ))}
