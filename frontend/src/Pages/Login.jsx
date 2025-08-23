@@ -177,7 +177,13 @@
 
                 </div>
 
+                  <div>
+                <h1 className='mb-1 font-medium'>New User? </h1>
+                <Link className="'mb-1 font-medium" to="/register">Click here to Register Now!</Link>
+            </div>
             </form>  
+
+         
         </section>
     )
     }

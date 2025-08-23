@@ -114,7 +114,7 @@ return (
         
         <p ref={errRef} className = {errMsg ? "text-red-500 mb-4 text-xl":"sr-only"} aria-live="assertive">{errMsg}</p>
         
-
+        <h1 className='text-center text-2xl font-sans font-bold mb-4'>Welcome to InventoryManager</h1>
         <form className="bg-blue-50 text-black p-6 rounded-md shadow-md w-full max-w-md space-y-4" onSubmit={handleSubmit}>
             
                  
